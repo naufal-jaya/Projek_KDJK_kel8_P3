@@ -1,63 +1,121 @@
 <div align="center">
-    <h1><b>Docmost</b></h1>
-    <p>
-        Open-source collaborative wiki and documentation software.
-        <br />
-        <a href="https://docmost.com"><strong>Website</strong></a> | 
-        <a href="https://docmost.com/docs"><strong>Documentation</strong></a> |
-        <a href="https://twitter.com/DocmostHQ"><strong>Twitter / X</strong></a>
-    </p>
+  <h1>Docmost</h1>
+  <p>Panduan instalasi dan menjalankan Docmost menggunakan Docker Compose</p>
 </div>
-<br />
 
-## Getting started
+> **Catatan gambar:** tambahkan logo Docmost di bagian atas jika diperlukan. Screenshot halaman Docmost dapat ditambahkan pada bagian verifikasi atau cara pemakaian.
 
-To get started with Docmost, please refer to our [documentation](https://docmost.com/docs) or try our [cloud version](https://docmost.com/pricing) .
+[ Sekilas Tentang ](#sekilas-tentang) | [ Persiapan ](#persiapan) | [ Konfigurasi ](#konfigurasi) | [ Menjalankan Aplikasi ](#menjalankan-aplikasi) | [ Verifikasi ](#verifikasi) | [ Referensi ](#referensi)
 
-## Features
+# Sekilas Tentang
 
-- Real-time collaboration
-- Diagrams (Draw.io, Excalidraw and Mermaid)
-- Spaces
-- Permissions management
-- Groups
-- Comments
-- Page history
-- Search
-- File attachments
-- Embeds (Airtable, Loom, Miro and more)
-- Translations (10+ languages)
+**Docmost** adalah aplikasi wiki dan dokumentasi kolaboratif _open source_. Docmost menyediakan ruang untuk menyusun dan berbagi dokumentasi bersama tim. Stack pada panduan ini menjalankan Docmost bersama PostgreSQL sebagai database dan Redis sebagai layanan pendukung, menggunakan Docker Compose.
 
-### Screenshots
+# Persiapan
 
-<p align="center">
-<img alt="home" src="https://docmost.com/screenshots/home.png" width="70%">
-<img alt="editor" src="https://docmost.com/screenshots/editor.png" width="70%">
-</p>
+Pastikan server atau komputer sudah memiliki Docker Engine dan Docker Compose, serta akses terminal.
 
-### License
+1. Buat direktori kerja khusus untuk Docmost, lalu masuk ke direktori tersebut:
 
-Docmost core is licensed under the open-source AGPL 3.0 license.  
-Enterprise features are available under an enterprise license (Enterprise Edition).
+   ```bash
+   mkdir -p /home/baha/docmost
+   cd /home/baha/docmost
+   ```
 
-All files in the following directories are licensed under the Docmost Enterprise license defined in `packages/ee/License`.
+2. Buat secret key acak untuk konfigurasi keamanan Docmost:
 
-- apps/server/src/ee
-- apps/client/src/ee
-- packages/ee
+   ```bash
+   openssl rand -hex 32
+   ```
 
-### Contributing
+   Salin hasilnya untuk digunakan sebagai nilai `APP_SECRET` pada langkah konfigurasi.
 
-See the [development documentation](https://docmost.com/docs/self-hosting/development)
+# Konfigurasi
 
-## Thanks
+Buat file `docker-compose.yml` di dalam direktori kerja, lalu isi dengan konfigurasi berikut. Ganti `<hex_secret_tadi>` dengan secret yang dibuat sebelumnya dan `<password>` dengan password database yang kuat. Gunakan password yang sama pada `DATABASE_URL` dan `POSTGRES_PASSWORD`.
 
-Special thanks to;
+```yaml
+services:
+  docmost:
+    image: docmost/docmost:latest
+    depends_on:
+      - db
+      - redis
+    environment:
+      APP_URL: "http://localhost:8305"
+      APP_SECRET: "<hex_secret_tadi>"
+      DATABASE_URL: "postgresql://docmost:<password>@db:5432/docmost?schema=public"
+      REDIS_URL: "redis://redis:6379"
+    ports:
+      - "8305:3000"
+    restart: unless-stopped
+    volumes:
+      - docmost_storage:/app/data/storage
 
-<img width="100" alt="Crowdin" src="https://github.com/user-attachments/assets/a6c3d352-e41b-448d-b6cd-3fbca3109f07" />
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: docmost
+      POSTGRES_USER: docmost
+      POSTGRES_PASSWORD: <password>
+    restart: unless-stopped
+    volumes:
+      - db_data:/var/lib/postgresql/data
 
-[Crowdin](https://crowdin.com/) for providing access to their localization platform.
+  redis:
+    image: redis:7.2-alpine
+    command:
+      [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--maxmemory-policy",
+        "noeviction",
+      ]
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
 
-<img width="48" alt="Algolia-mark-square-white" src="https://github.com/user-attachments/assets/6ccad04a-9589-4965-b6a1-d5cb1f4f9e94" />
+volumes:
+  docmost_storage:
+  db_data:
+  redis_data:
+```
 
-[Algolia](https://www.algolia.com/) for providing full-text search to the docs.
+Port host `8305` diteruskan ke port `3000` di dalam container Docmost. Data aplikasi, PostgreSQL, dan Redis disimpan pada Docker volumes agar tetap tersedia setelah container dimatikan atau dibuat ulang.
+
+# Menjalankan Aplikasi
+
+Dari direktori yang berisi `docker-compose.yml`, jalankan stack di background:
+
+```bash
+docker compose up -d
+```
+
+Docker Compose akan mengambil image yang diperlukan, membuat network dan volumes, lalu menjalankan Docmost, PostgreSQL, dan Redis.
+
+# Verifikasi
+
+Periksa status container:
+
+```bash
+docker compose ps
+```
+
+Pastikan layanan Docmost, database, dan Redis berstatus berjalan. Kemudian cek respons aplikasi:
+
+```bash
+curl -I http://127.0.0.1:8305
+```
+
+Jika server mengembalikan respons HTTP yang berhasil, Docmost dapat diakses melalui alamat berikut:
+
+- `http://localhost:8305` dari komputer yang menjalankan Docker.
+- `http://<alamat-ip-server>:8305` dari komputer lain yang dapat menjangkau server.
+
+> **Catatan screenshot:** tambahkan screenshot halaman Docmost setelah aplikasi berhasil dibuka, jika diperlukan.
+
+# Referensi
+
+1. [Dokumentasi Docmost](https://docmost.com/docs) — Docmost
+2. [Docker Compose](https://docs.docker.com/compose/) — Docker
