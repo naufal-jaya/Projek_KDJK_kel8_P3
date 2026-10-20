@@ -58,9 +58,9 @@ Instalasi Docmost dilakukan dengan pendekatan kontainerisasi menggunakan Docker 
 1. **Akses ke Ubuntu Server via SSH**  
    Buka terminal lokal dan lakukan koneksi aman ke Ubuntu Server tujuan:
    ```bash
-   ssh baha@IP_VM -p 22
+   ssh <username>@<IP_VM> -p 22
    ```
-   > *Sesuaikan `baha` dan `IP_VM` dengan akun dan alamat IP VM kelompok.*
+   > *Sesuaikan `<username>` dan `<IP_VM>` dengan akun dan alamat IP VM kamu (misal: `adam@172.18.88.78` jika menggunakan VPS NCC).*
 
 2. **Pembaruan Paket Sistem dan Dependensi Docker**  
    Pastikan repositori sistem mutakhir dan komponen kontainer terpasang:
@@ -91,8 +91,8 @@ Instalasi Docmost dilakukan dengan pendekatan kontainerisasi menggunakan Docker 
 3. **Menyiapkan Direktori Kerja Khusus**  
    Buat folder kerja untuk menyimpan konfigurasi dan volume stack Docmost:
    ```bash
-   mkdir -p /home/baha/docmost
-   cd /home/baha/docmost
+   mkdir -p ~/docmost
+   cd ~/docmost
    ```
 
 4. **Menghasilkan Encryption Secret Key**  
@@ -266,7 +266,7 @@ Pemeliharaan sistem secara berkala wajib dilakukan untuk menjaga integritas data
 ### 1. Pencadangan (*Backup*) Basis Data PostgreSQL
 Pencadangan logis dilakukan menggunakan utilitas `pg_dump` langsung dari dalam container database tanpa perlu menghentikan layanan:
 ```bash
-cd /home/baha/docmost
+cd ~/docmost
 
 # Menghasilkan file SQL backup berstempel waktu
 docker compose exec -T db pg_dump -U docmost docmost > backup_docmost_$(date +%Y%m%d_%H%M%S).sql
@@ -295,7 +295,7 @@ Jika terjadi insiden kehilangan data atau migrasi server:
 ### 4. Pembaruan Versi Kontainer (*Upgrade Image*)
 Untuk memperbarui Docmost ke rilis versi terbaru:
 ```bash
-cd /home/baha/docmost
+cd ~/docmost
 docker compose pull
 docker compose up -d --remove-orphans
 ```
@@ -320,7 +320,7 @@ Untuk mempermudah proses deployment, konfigurasi, dan pemeliharaan server, kelom
 ### 1. Skrip Instalasi Otomatis (`setup.sh`)
 Skrip [setup.sh](setup.sh) disediakan langsung di dalam repositori ini. Skrip ini secara otomatis:
 - Memeriksa dan menginstal paket Docker & Docker Compose Plugin.
-- Membuat direktori kerja di `/home/baha/docmost`.
+- Membuat direktori kerja di `~/docmost`.
 - Menghasilkan `APP_SECRET` unik dan password acak basis data.
 - Menulis berkas konfigurasi `docker-compose.yml`.
 - Menjalankan kontainer di latar belakang dan memverifikasi respon HTTP port 8305.
@@ -346,7 +346,7 @@ crontab -e
 ```
 Tambahkan baris berikut:
 ```cron
-0 2 * * * cd /home/baha/docmost && docker compose exec -T db pg_dump -U docmost docmost > /home/baha/backups/docmost_$(date +\%F).sql
+0 2 * * * cd ~/docmost && docker compose exec -T db pg_dump -U docmost docmost > ~/backups/docmost_$(date +\%F).sql
 ```
 
 ---
