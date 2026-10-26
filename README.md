@@ -28,8 +28,6 @@ Komponen inti dari Docmost didistribusikan di bawah lisensi terbuka **AGPL-3.0**
 - **Database Engine**: Didukung oleh **PostgreSQL 16** sebagai basis data relasional utama untuk integritas data terstruktur.
 - **In-Memory Cache & Message Broker**: Didukung oleh **Redis 7.2** untuk caching, manajemen antrean, dan pub/sub sinkronisasi kolaborasi *real-time*.
 
-Dalam konteks mata kuliah **Komunikasi Data dan Jaringan Komputer (KDJK)**, Docmost diimplementasikan pada lingkungan Virtual Machine (VM) Ubuntu Server menggunakan orkestrasi **Docker Compose**. Proyek ini mendemonstrasikan integrasi jaringan kontainer (*bridge network*), pemetaan *port forwarding* (Host port `8305` ke Container port `3000`), pengelolaan volume persisten, serta penerapan reverse proxy untuk akses domain publik `docmost.ultradot.space`.
-
 <p align="center">
   <img src="https://docmost.com/screenshots/home.png" alt="Dashboard Utama Docmost" width="85%">
   <br>
@@ -170,7 +168,7 @@ Instalasi Docmost dilakukan dengan pendekatan kontainerisasi menggunakan Docker 
 8. **Akses Antarmuka Web Docmost**  
    Buka peramban (*web browser*) dari komputer klien dan akses:
    - Akses Port Lokal Host: `http://IP_VM:8305` (atau `http://localhost:8305` jika diakses langsung dari server).
-   - Akses Domain Publik (jika reverse proxy aktif): `https://docmost.ultradot.space`
+   - Akses Domain Publik (jika DNS dan reverse proxy telah dikonfigurasi): gunakan domain Anda, misalnya `https://docmost.example.com` (ganti dengan domain Anda).
 
 ---
 
@@ -196,7 +194,7 @@ Konfigurasi aplikasi Docmost berfokus pada penyesuaian lingkungan jaringan, mana
 
 ### 1. Konfigurasi Environment Variable
 Pengaturan inti Docmost dikelola melalui berkas `docker-compose.yml`:
-- **`APP_URL`**: Mendefinisikan URL resmi yang dikenali oleh aplikasi untuk pembuatan pranala, aset statis, dan validasi *origin header*. Jika diakses langsung via IP, gunakan format `http://IP_VM:8305`. Jika menggunakan reverse proxy berdomain HTTPS, ubah nilainya menjadi `https://docmost.ultradot.space`.
+- **`APP_URL`**: Mendefinisikan URL resmi yang dikenali oleh aplikasi untuk pembuatan pranala, aset statis, dan validasi *origin header*. Jika diakses langsung via IP, gunakan format `http://IP_VM:8305`. Jika menggunakan reverse proxy dengan domain HTTPS, atur nilainya sesuai domain Anda, misalnya `https://docmost.example.com` (ganti dengan domain yang telah Anda konfigurasi).
 - **`APP_SECRET`**: Kunci enkripsi simetris 256-bit untuk mengamankan tanda tangan token otentikasi.
 - **`DATABASE_URL`**: Format connection string standar PostgreSQL: `postgresql://<user>:<password>@<service-name>:<port>/<db_name>?schema=public`. Menggunakan nama service Compose `db` sebagai resolver DNS internal Docker.
 - **`REDIS_URL`**: Menyambungkan aplikasi ke container Redis pada port standar `6379`.
@@ -229,11 +227,13 @@ Volume `docmost_storage` dipetakan ke direktori internal kontainer `/app/data/st
 - Aset ekspor data dokumen.
 
 ### 6. Konfigurasi Reverse Proxy & Domain Publik (Opsional)
-Untuk menghubungkan domain `docmost.ultradot.space` secara aman menggunakan HTTPS (SSL Let's Encrypt), web server Caddy atau Nginx dikonfigurasikan di depan port `8305`.
+Untuk menghubungkan domain Anda secara aman menggunakan HTTPS (SSL Let's Encrypt), web server Caddy atau Nginx dikonfigurasikan di depan port `8305`.
+
+**Catatan:** Domain `docmost.example.com` pada contoh berikut hanyalah ilustrasi. Ganti dengan domain Anda yang telah diarahkan ke alamat IP publik server.
 
 **Contoh Konfigurasi Caddy (`Caddyfile`):**
 ```caddy
-docmost.ultradot.space {
+docmost.example.com {
     reverse_proxy 127.0.0.1:8305
 }
 ```
@@ -241,7 +241,7 @@ docmost.ultradot.space {
 **Contoh Konfigurasi Nginx (`/etc/nginx/sites-available/docmost`):**
 ```nginx
 server {
-    server_name docmost.ultradot.space;
+    server_name docmost.example.com;
 
     location / {
         proxy_pass http://127.0.0.1:8305;
