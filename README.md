@@ -6,16 +6,19 @@
 
 <p align="center">
   <b>Collaborative Wiki and Documentation Software</b><br>
-  <i>Laporan Projek Akhir Mata Kuliah Komunikasi Data dan Jaringan Komputer (KDJK)</i><br>
+  <i>Laporan Projek Mata Kuliah Komunikasi Data dan Jaringan Komputer (KDJK)</i><br>
   <b>Kelompok 8 Paralel 3</b>
 </p>
 
-[Sekilas Tentang](#sekilas-tentang) | [Instalasi](#instalasi) | [Konfigurasi](#konfigurasi) | [Maintenance](#maintenance) | [Otomatisasi](#otomatisasi) | [Cara Pemakaian](#cara-pemakaian) | [Pembahasan](#pembahasan) | [Referensi](#referensi)
-:---:|:---:|:---:|:---:|:---:|:---:|:---:
+<p align="center">
+  <a href="#gambaran-umum">Gambaran Umum</a> | <a href="#instalasi">Instalasi</a> | <a href="#konfigurasi">Konfigurasi</a> | <a href="#maintenance">Maintenance</a><br>
+  <a href="#otomatisasi">Otomatisasi</a> | <a href="#cara-pemakaian">Cara Pemakaian</a> | <a href="#pembahasan">Pembahasan</a> | <a href="#referensi">Referensi</a>
+</p>
+
 
 ---
 
-# Sekilas Tentang
+# Gambaran Umum
 [`^kembali`](#)
 
 **Docmost** adalah aplikasi web *open-source* yang dirancang sebagai platform wiki dan manajemen dokumentasi kolaboratif (*knowledge base*). Aplikasi ini memungkinkan beberapa pengguna untuk menyunting dokumen secara bersamaan (*real-time collaboration*), sehingga sangat ideal digunakan untuk dokumentasi teknis, catatan arsitektur sistem, basis pengetahuan tim, panduan proyek, serta dokumentasi operasional organisasi.
@@ -358,7 +361,7 @@ Docmost menyediakan antarmuka web modern, elegan, dan intuitif. Berikut adalah p
 
 ### 1. Inisialisasi Akun Administrator dan Workspace
 Saat pertama kali mengakses `http://IP_VM:8305`, pengguna akan diarahkan ke halaman konfigurasi awal:
-1. Masukkan **Nama Workspace** (misalnya: `Projek Akhir KDJK Kelompok 8`).
+1. Masukkan **Nama Workspace** (misalnya: `Projek KDJK Kelompok 8`).
 2. Masukkan identitas pengguna administrator (Nama Lengkap, Email, dan Password yang kuat).
 3. Klik tombol **Create Workspace**. Akun ini akan bertindak sebagai pemilik (*Workspace Owner*).
 
@@ -384,7 +387,7 @@ Setelah otentikasi berhasil, pengguna disambut oleh antarmuka dashboard utama ya
 ### 3. Membuat Space (Ruang Kerja Proyek)
 Spaces digunakan untuk mengisolasi topik atau subproyek tertentu agar dokumentasi tidak tercampur:
 1. Klik tombol **New Space** pada panel samping kiri.
-2. Masukkan nama space, misalnya: `Projek Akhir KDJK`.
+2. Masukkan nama space, misalnya: `Projek KDJK`.
 3. Tentukan deskripsi dan visibilitas ruang kerja (Public atau Restricted).
 4. Klik **Create**.
 
@@ -404,7 +407,7 @@ Docmost mendukung struktur hierarki bertingkat (*nested documentation structure*
 
 Contoh struktur pengorganisasian dokumen kelompok:
 ```text
-Projek Akhir KDJK (Space)
+Projek KDJK (Space)
 ├── 01. Sekilas Tentang Docmost
 ├── 02. Panduan Instalasi
 │   ├── Kebutuhan Sistem
@@ -481,7 +484,7 @@ Administrator dapat mengundang anggota kelompok dan menetapkan wewenang:
 # Pembahasan
 [`^kembali`](#)
 
-### 1. Tinjauan Arsitektur Jaringan (Perspektif KDJK)
+### 1. Tinjauan Arsitektur Jaringan 
 Penerapan Docmost merefleksikan konsep-konsep fundamental dalam komunikasi data dan jaringan komputer:
 - **Port Mapping & Network Address Translation (NAT)**: Paket TCP yang tiba pada alamat IP Host port `8305` diterjemahkan oleh subnet Docker Bridge ke port kontainer `3000`.
 - **Inter-Container Communication (Service Discovery)**: Kontainer aplikasi berkomunikasi dengan PostgreSQL (`db:5432`) dan Redis (`redis:6379`) memanfaatkan internal DNS resolver Docker Compose tanpa mengekspos port database ke jaringan publik.
@@ -503,10 +506,10 @@ flowchart LR
         end
     end
 
-    Browser -->|Request HTTP / TCP:8305| PortHost
-    PortHost -->|Bridge NAT| App
-    App -->|TCP Query (Database)| DB
-    App -->|Pub/Sub & Cache| Cache
+    Browser -->|"Request HTTP / TCP:8305"| PortHost
+    PortHost -->|"Bridge NAT"| App
+    App -->|"TCP Query (Database)"| DB
+    App -->|"Pub/Sub & Cache"| Cache
 ```
 
 ---
@@ -574,4 +577,4 @@ Implementasi Docmost pada Ubuntu Server berhasil dieksekusi dengan baik memanfaa
 7. [Redis Official Documentation](https://redis.io/docs/) — Dokumentasi in-memory cache dan arsitektur persistensi AOF Redis.
 8. [Notion Help Center](https://www.notion.com/help) — Panduan fitur workspace dan perbandingan kapabilitas Notion.
 9. [BookStack Documentation](https://www.bookstackapp.com/docs/) — Panduan arsitektur dan struktur dokumentasi BookStack.
-10. [Panduan Projek Akhir KDJK CS-IPB](panduan.md) — Ketentuan pelaksanaan dan rubrik penilaian mata kuliah KDJK.
+10. [Panduan Projek KDJK CS-IPB](panduan.md) — Ketentuan pelaksanaan dan rubrik penilaian mata kuliah KDJK.
