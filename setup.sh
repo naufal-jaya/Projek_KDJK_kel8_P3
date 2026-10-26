@@ -3,7 +3,7 @@
 # Script Otomatisasi Instalasi Docmost Stack (KDJK Kelompok 8)
 # Layanan: Docmost + PostgreSQL 16 + Redis 7.2 via Docker Compose
 # ==============================================================================
-
+  
 set -e
 
 INSTALL_DIR="${HOME}/docmost"
